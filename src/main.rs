@@ -40,6 +40,13 @@ fn handle_connection(mut stream: TcpStream) {
 
     if uri=="/"{
             stream.write_all("HTTP/1.1 200 OK\r\n\r\n".as_bytes()).unwrap();
+    }else if uri.starts_with("/echo/"){
+        let contents=&uri[6..];
+        let length=contents.len();
+        let status_line="HTTP/1.1 200 OK";
+        let response=
+            format!("{status_line}\r\nContent-Type:text/plain\r\nContent-Length:{length}\r\n\r\n{contents}");
+        stream.write_all(response.as_bytes()).unwrap();
     }else if uri=="/user-agent" {
         let headers:HashMap<String, String>=request_line[1..].iter()
             .filter_map(|x| x.split_once(':'))
