@@ -33,13 +33,17 @@ fn handle_connection(mut stream: TcpStream) {
 
         let parts2:Vec<&str>=uri.split("/").collect();
             if parts2.len()==2{
-            let contents=parts2[2];
+                let contents=parts2[2];
+                println!("contents:{}",contents);
                 if parts2[1]=="echo" {
-                let status_line="HTTP/1.1 200 OK";
-                let length=contents.len();
-                let response=
+                    println!("parts2[1]:{}",parts2[1]);
+                    let status_line="HTTP/1.1 200 OK";
+                    println!("status_line:{}",status_line);
+                    let length=contents.len();
+                    println!("length:{}",length);
+                    let response=
                     format!("{status_line}\r\nContent-Type:text/plain\r\nContent-Length:{length}\r\n\r\n{contents}");
-                stream.write_all(response.as_bytes()).unwrap();    
+                    stream.write_all(response.as_bytes()).unwrap();    
                 }
             }
     }else{
