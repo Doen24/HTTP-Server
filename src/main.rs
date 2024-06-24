@@ -3,6 +3,8 @@ use std::{
     io::{prelude::*, BufReader},
     net::{TcpListener, TcpStream},
     collections::HashMap,
+    thread,
+    time::Duration,
 };
 
 fn main() {
@@ -10,8 +12,10 @@ fn main() {
 
     for stream in listener.incoming() {
         let stream = stream.unwrap();
-
+        
         handle_connection(stream);
+        
+        
     }
 }
 
