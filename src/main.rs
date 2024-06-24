@@ -29,7 +29,7 @@ fn handle_connection(mut stream: TcpStream) {
         let method=parts[0];
         let uri=parts[1];
         let httpversion=parts[2];
-        if uri=='/'{
+        if parts[1]=="/"{
             let response=
                 format!("HTTP/1.1 200 OK\r\n\r\n");
                 stream.write_all(response.as_bytes()).unwrap();  
