@@ -43,9 +43,9 @@ fn handle_connection(mut stream: TcpStream) {
         }
         }
     }else{
-        status_line="HTTP/1.1 404 Not Found";
-        response=format!("{status_line}\r\n\r\n");
-        stream.write_all(response.as_bytes()).unwrap();    
+        // let status_line="HTTP/1.1 404 Not Found";
+        // let response=format!("{status_line}\r\n\r\n");
+        stream.write_all("HTTP/1.1 404 Not Found".as_bytes()).unwrap();    
     }
 
 
