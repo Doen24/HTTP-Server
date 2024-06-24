@@ -42,7 +42,7 @@ fn handle_connection(mut stream: TcpStream) {
                     let length=contents.len();
                     println!("length:{}",length);
                     let response=
-                    format!("{status_line}\r\nContent-Type:text/plain\r\nContent-Length:{length}\r\n\r\n{contents}");
+                    format!("{status_line}\r\nContent-Type:text/plain\r\nContent-Length:{length}\r\n{contents}");
                     stream.write_all(response.as_bytes()).unwrap();    
                 }
             }
