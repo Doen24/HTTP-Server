@@ -25,8 +25,8 @@ fn handle_connection(mut stream: TcpStream) {
     if method=="GET"{
         if uri=="/"{
             stream.write_all("HTTP/1.1 200 OK\r\n\r\n".as_bytes()).unwrap();
-        }else if uri.starts_with("/user-agent"){
-            let headers:HashMap<&str,&str>=request_line[1].lines().map(|x| x.split_once(':').expect("Invaild header format")).collect();
+        }else if uri=="/user-agent" {
+            let headers:HashMap<String,String>=request_line[1].lines().map(|x| x.split_once(':').expect("Invaild header format")).collect();
             let key="User-Agent";
             match headers.get(key){
                 Some(value)=>{
