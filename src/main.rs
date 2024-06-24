@@ -32,7 +32,7 @@ fn handle_connection(mut stream: TcpStream) {
     
 
         let parts2:Vec<&str>=uri.split("/").collect();
-            if parts2.len()==2{
+            if parts2.len()==3{
                 let contents=parts2[2];
                 println!("contents:{}",contents);
                 if parts2[1]=="echo" {
