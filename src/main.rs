@@ -29,18 +29,18 @@ fn handle_connection(mut stream: TcpStream) {
         let method=parts[0];
         let uri=parts[1];
         let httpversion=parts[2];
-    
-
-        if uri.starts_with("/echo/")
+        if uri=='/'{
+            let response=
+                format!("HTTP/1.1 200 OK\r\n\r\n");
+                stream.write_all(response.as_bytes()).unwrap();  
+        }else if uri.starts_with("/echo/")
             {
                 let contents=&uri[6..];
-                // println!("contents:{}",contents);
                 
-                    // println!("parts2[1]:{}",parts2[1]);
                 let status_line="HTTP/1.1 200 OK";
-                    // println!("status_line:{}",status_line);
+                  
                 let length=contents.len();
-                    // println!("length:{}",length);
+                    
                 let response=
                         format!("{status_line}\r\nContent-Type:text/plain\r\nContent-Length:{length}\r\n\r\n{contents}");
                 stream.write_all(response.as_bytes()).unwrap();    
