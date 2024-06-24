@@ -37,8 +37,8 @@ fn handle_connection(mut stream: TcpStream) {
     if parts2.len()==2{
         let contents=parts2[1];
         if parts2[0]=='echo' {
-            status_line="HTTP/1.1 200 OK";
-            length=contents.len();
+            let status_line="HTTP/1.1 200 OK";
+            let length=contents.len();
             let response=
                 format!("{status_line}\r\nContent-Type:text/plain\r\nContent-Length:{length}\r\n\r\n{contents}");
         }
