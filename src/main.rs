@@ -36,7 +36,7 @@ fn handle_connection(mut stream: TcpStream) {
     let parts2:Vec<&str>=uri.split("/").collect();
     if parts2.len()==2{
         let contents=parts2[1];
-        if parts2[0]=='echo' {
+        if parts2[0]=="echo" {
             let status_line="HTTP/1.1 200 OK";
             let length=contents.len();
             let response=
