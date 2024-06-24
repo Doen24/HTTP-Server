@@ -25,32 +25,26 @@ fn handle_connection(mut stream: TcpStream) {
     // };
     // //Resolusion 2  :按词解析，因为status_line是规则的，method+space+uri+space+httpversion+CR+LF
     let parts:Vec<&str>=request_line.split_whitespace().collect();
-    if parts.len()==3{
-        let method=parts[0];
-        let uri=parts[1];
-        let httpversion=parts[2];
-        if parts[1]=="/"{
-            let response=
-                format!("HTTP/1.1 200 OK\r\n\r\n");
-                stream.write_all(response.as_bytes()).unwrap();  
-        }else if uri.starts_with("/echo/")
-            {
-                let contents=&uri[6..];
-                
-                let status_line="HTTP/1.1 200 OK";
-                  
-                let length=contents.len();
-                    
-                let response=
-                        format!("{status_line}\r\nContent-Type:text/plain\r\nContent-Length:{length}\r\n\r\n{contents}");
-                stream.write_all(response.as_bytes()).unwrap();    
-                }
+    let method=parts[0];
+    let uri=parts[1];
+    let httpversion=parts[2];
+    if method=="GET"{
+        if uri=="/"{
+            stream.write_all("HTTP/1.1 200 OK\r\n\r\n".as_bytes()).unwrap();
+        }else if uri.starts_with("/echo/"){
+            let contents=&uri[6..];
+            let length=contents.len();
+            let response=format!("HTTP/1.1 200 OK\r\nContent-Type:text/plain\r\nContent-Length:{}\r\n\r\n{}",contents.len(),contents);
+            stream.write_all(response.as_bytes()).unwrap();
+        
+        }else{
+            stream.write_all("HTTP/1.1 404 Not Found\r\n\r\n".as_bytes()).unwrap();
+        }
     }else{
-        // let status_line="HTTP/1.1 404 Not Found";
-        // let response=format!("{status_line}\r\n\r\n");
-        stream.write_all("HTTP/1.1 404 Not Found\r\n\r\n".as_bytes()).unwrap();    
-    }    
+        stream.write_all("HTTP/1.1 404 Not Found\r\n\r\n".as_bytes()).unwrap();
+    }
 }
 
 
-    
+
+      
