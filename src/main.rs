@@ -31,11 +31,11 @@ fn handle_connection(mut stream: TcpStream) {
         let httpversion=parts[2];
     
 
-        let parts2:Vec<&str>=uri.split("/").collect();
-            if parts2.len()==2{
-                let contents=parts2[1];
-                println!("contents:{}",contents);
-                if parts2[0]=="echo" {
+        if uri.starts_with("/echo/")
+            {if parts2.len()==3{
+                let contents=&uri[6..];
+                // println!("contents:{}",contents);
+                if parts2[1]=="echo" {
                     // println!("parts2[1]:{}",parts2[1]);
                     let status_line="HTTP/1.1 200 OK";
                     // println!("status_line:{}",status_line);
@@ -45,7 +45,7 @@ fn handle_connection(mut stream: TcpStream) {
                         format!("{status_line}\r\nContent-Type:text/plain\r\nContent-Length:{length}\r\n\r\n{contents}");
                     stream.write_all(response.as_bytes()).unwrap();    
                 }
-            }
+            }}
             else{
                 // let status_line="HTTP/1.1 404 Not Found";
                 // let response=format!("{status_line}\r\n\r\n");
