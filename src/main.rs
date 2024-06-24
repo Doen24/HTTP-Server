@@ -66,6 +66,11 @@ fn handle_connection(mut stream: TcpStream) {
            
         
         }
+        else {
+            send_404(&mut stream);
+            return;        
+        }
+
     
     
 }
