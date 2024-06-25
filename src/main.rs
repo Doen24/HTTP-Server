@@ -12,8 +12,10 @@ use http_server_starter_rust::ThreadPool;
 fn main() {
     let pool=ThreadPool::new(5);
     let args:Vec<String>=env::args().collect();
+    println!("{:?}",args);
     let directory= if let Some(dir)=args.iter().position(|x| x=="--directory"){
         &args[dir+1]
+        println!("Directory:{}",directory);
     }
     else{
         eprintln!("Usage:{}",args[0]);
