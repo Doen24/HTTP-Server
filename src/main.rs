@@ -5,16 +5,18 @@ use std::{
     collections::HashMap,
     thread,
     env,
+    path::PathBuf,
 };
 
 fn main() {
-    let args:Vec<String>=env::args().iter().collect();
-    let directory= if let Some(dir)=args.iter().position(|| x=="--directory"){
+    let args:Vec<String>=env::args().collect();
+    let directory= if let Some(dir)=args.iter().position(|x| x=="--directory"){
         &args[dir+1]
     }
     else{
         eprintln!("Usage:{}",args[0]);
-    }
+        return;
+    };
 
     let listener = TcpListener::bind("127.0.0.1:4221").unwrap();
 
@@ -49,7 +51,7 @@ fn handle_connection(mut stream: TcpStream,directory:&str) {
         send_404(&mut stream);
         return;
     }
-// if uri=="files"{} statrt with  剩余部分为文件名， 文件名是否存在，contents=文件名。read_to_string 
+
     if uri=="/"{
             stream.write_all("HTTP/1.1 200 OK\r\n\r\n".as_bytes()).unwrap();
     }else if uri.starts_with("/echo/"){
@@ -61,7 +63,7 @@ fn handle_connection(mut stream: TcpStream,directory:&str) {
         stream.write_all(response.as_bytes()).unwrap();
     }else if uri.starts_with("/files/"){
         let filename=&uri[7..];
-        let mut filepath=Pathbuf::from(directory);
+        let mut filepath=PathBuf::from(directory);
         filepath.push(filename);
 
         match fs::read(&filepath){
@@ -69,18 +71,15 @@ fn handle_connection(mut stream: TcpStream,directory:&str) {
                 let length=contents.len();
                 let status_line="HTTP/1.1 200 OK";
                 let response=
-                    format!("{status_line}\r\nContent-Type:application/octet-stream\r\nContent-Length:{length}\r\n\r\n{contents}");
+                    format!("{status_line}\r\nContent-Type:application/octet-stream\r\nContent-Length:{length}\r\n\r\n");
                 stream.write_all(response.as_bytes()).unwrap();
+                stream.write_all(&contents).unwrap();
             }
             Err(_)=>{
                 send_404(&mut stream);
             }
         }
-        // let length=contents.len();
-        // let status_line="HTTP/1.1 200 OK";
-        // let response=
-        //     format!("{status_line}\r\nContent-Type:text/plain\r\nContent-Length:{length}\r\n\r\n{contents}");
-        // stream.write_all(response.as_bytes()).unwrap();
+    } 
     else if uri=="/user-agent" {
         let headers:HashMap<String, String>=request_line[1..].iter()
             .filter_map(|x| x.split_once(':'))
