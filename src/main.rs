@@ -7,8 +7,10 @@ use std::{
     env,
     path::PathBuf,
 };
+use http_server_starter_rust::ThreadPool;
 
 fn main() {
+    let pool=ThreadPool::new(5);
     let args:Vec<String>=env::args().collect();
     let directory= if let Some(dir)=args.iter().position(|x| x=="--directory"){
         &args[dir+1]
@@ -23,7 +25,7 @@ fn main() {
     for stream in listener.incoming() {
         let stream = stream.unwrap();
         let directory=directory.to_string();  
-        thread::spawn(move || {
+        pool.execute( move|| {
             handle_connection(stream,&directory);
         });  
         
