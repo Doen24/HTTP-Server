@@ -36,7 +36,7 @@ fn main() {
     }
 }
 
-fn handle_connection(mut stream: TcpStream,directory:&str) {
+fn handle_connection(mut stream: TcpStream,directory:String) {
     let buf_reader = BufReader::new(&mut stream);
     let request_line=buf_reader.lines().map(|line|line.unwrap()).take_while(|line|!line.is_empty()).collect::<Vec<String>>();
 
