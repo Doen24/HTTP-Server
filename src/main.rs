@@ -15,7 +15,7 @@ fn main() {
     println!("{:?}",args);
     let directory= if let Some(dir)=args.iter().position(|x| x=="--directory"){
         &args[dir+1]
-        println!("Directory:{}",directory);
+        // println!("Directory:{}",directory);
     }
     else{
         eprintln!("Usage:{}",args[0]);
@@ -26,7 +26,7 @@ fn main() {
 
     for stream in listener.incoming() {
         let stream = stream.unwrap();
-        let directory=directory.to_string();  
+        // let directory=directory.to_string();  
         pool.execute( move|| {
             handle_connection(stream,&directory);
         });  
