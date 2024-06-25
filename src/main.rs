@@ -22,8 +22,11 @@ fn main() {
 
     for stream in listener.incoming() {
         let stream = stream.unwrap();
-        let directory=directory.to_string();    
-        handle_connection(stream,&directory);
+        let directory=directory.to_string();  
+        thread::spawn(move || {
+            handle_connection(stream,&directory);
+        });  
+        
         
         
     }
