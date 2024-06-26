@@ -14,7 +14,7 @@ fn main() {
     let args:Vec<String>=env::args().collect();
     println!("{:?}",args);
     let directory= if let Some(dir)=args.iter().position(|x| x=="--directory"){
-        &args[dir+1]
+        args[dir+1].clone()
         // println!("Directory:{}",directory);
     }
     else{
