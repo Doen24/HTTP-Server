@@ -8,10 +8,10 @@ use std::{
     path::PathBuf,
     sync::Arc,
 };
-use http_server_starter_rust::ThreadPool;
+// use http_server_starter_rust::ThreadPool;
 
 fn main() {
-    let pool=ThreadPool::new(5);
+    // let pool=ThreadPool::new(5);
     let args:Vec<String>=env::args().collect();
     println!("{:?}",args);
     let directory= if let Some(dir)=args.iter().position(|x| x=="--directory"){
