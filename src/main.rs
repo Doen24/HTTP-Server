@@ -34,7 +34,7 @@ fn main() {
         // handle_connection(stream,directory_clone.as_str());
         thread::spawn(|| {
             handle_connection(stream,directory_clone.as_str());
-        }
+        });
         
         
     }
