@@ -29,7 +29,7 @@ fn main() {
         let stream = stream.unwrap();
         // let directory=directory.to_string();  
         pool.execute(move || {
-            handle_connection(stream,directory.as_str());
+            handle_connection(stream,directory);
         });  
         
         
