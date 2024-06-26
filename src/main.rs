@@ -27,7 +27,7 @@ fn main() {
     for stream in listener.incoming() {
         let stream = stream.unwrap();
         // let directory=directory.to_string();  
-        pool.execute( move|| {
+        pool.execute( || {
             handle_connection(stream,&directory);
         });  
         
