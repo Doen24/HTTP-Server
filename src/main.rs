@@ -14,14 +14,16 @@ fn main() {
     let pool=ThreadPool::new(5);
     let args:Vec<String>=env::args().collect();
     println!("{:?}",args);
+    
     let directory= if let Some(dir)=args.iter().position(|x| x=="--directory"){
         args[dir+1].clone()
         // println!("Directory:{}",directory);
+    }
+    else{
+        eprintln!("Usage:{}",args[0]);
+        "none file".to_string()
+        // return;
     };
-    // else{
-    //     eprintln!("Usage:{}",args[0]);
-    //     return;
-    // };
 
     let listener = TcpListener::bind("127.0.0.1:4221").unwrap();
 
