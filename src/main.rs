@@ -32,7 +32,7 @@ fn main() {
         //     handle_connection(stream,directory_clone.as_str());
         // });  
         // handle_connection(stream,directory_clone.as_str());
-        thread::spawn(|| {
+        thread::spawn(move|| {
             handle_connection(stream,directory_clone.as_str());
         });
         
