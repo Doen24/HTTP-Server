@@ -15,7 +15,7 @@ fn main() {
     let args:Vec<String>=env::args().collect();
     println!("{:?}",args);
     let directory= if let Some(dir)=args.iter().position(|x| x=="--directory"){
-        (args[dir+1].clone()).as_str()
+        args[dir+1].clone()
         // println!("Directory:{}",directory);
     }
     else{
@@ -27,7 +27,7 @@ fn main() {
 
     for stream in listener.incoming() {
         let stream = stream.unwrap();
-        // let directory=directory.to_string();  
+        let directory=directory.as_str();  
         pool.execute(move || {
             handle_connection(stream,directory);
         });  
