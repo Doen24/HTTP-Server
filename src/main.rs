@@ -28,9 +28,10 @@ fn main() {
     for stream in listener.incoming() {
         let stream = stream.unwrap();
         let directory_clone=directory.clone();  
-        pool.execute(move || {
-            handle_connection(stream,directory_clone.as_str());
-        });  
+        // pool.execute(move || {
+        //     handle_connection(stream,directory_clone.as_str());
+        // });  
+        handle_connection(stream,directory_clone.as_str());
         
         
         
