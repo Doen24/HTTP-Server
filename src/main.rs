@@ -71,9 +71,9 @@ fn handle_connection(mut stream: TcpStream,directory:&str) {
         stream.write_all(response.as_bytes()).unwrap();
     }else if uri.starts_with("/files/"){
         let filename=&uri[7..];
-        // let mut filepath=PathBuf::from(directory);
-        let mut filepath=directory.to_string();
-        filepath.push_str(filename);
+        let mut filepath=PathBuf::from(&directory);
+        // let mut filepath=directory.to_string();
+        filepath.push(filename);
 
         match fs::read(&filepath){
             Ok(contents)=>{
