@@ -11,36 +11,58 @@ use std::{
 use http_server_starter_rust::ThreadPool;
 
 fn main() {
+    let listener = TcpListener::bind("127.0.0.1:4221").unwrap();
+    
     let pool=ThreadPool::new(5);
     let args:Vec<String>=env::args().collect();
     println!("{:?}",args);
-    
-    let directory= if let Some(dir)=args.iter().position(|x| x=="--directory"){
-        args[dir+1].clone()
+    if args.len()>1{
+        let directory= if let Some(dir)=args.iter().position(|x| x=="--directory"){
+            args[dir+1].clone()
         // println!("Directory:{}",directory);
+        }
+        else{
+            eprintln!("Usage:{}",args[0]);
+        // "none file".to_string()
+            return;
+        };
+    
+        for stream in listener.incoming() {
+            let stream = stream.unwrap();
+            let directory_clone=directory.clone();  
+            pool.execute(move || {
+                handle_connection(stream,directory_clone.as_str());
+            });  
     }
-    else{
-        eprintln!("Usage:{}",args[0]);
-        "none file".to_string()
-        // return;
-    };
+    }else{
+        let directory=" ".to_string();
+        for stream in listener.incoming() {
+            let stream = stream.unwrap();
+            let directory_clone=directory.clone();  
+            pool.execute(move || {
+                handle_connection(stream,directory_clone.as_str());
+            });  
+        }
+}   
+}
+        
+    
 
-    let listener = TcpListener::bind("127.0.0.1:4221").unwrap();
-
-    for stream in listener.incoming() {
-        let stream = stream.unwrap();
-        let directory_clone=directory.clone();  
-        pool.execute(move || {
-            handle_connection(stream,directory_clone.as_str());
-        });  
+    // let listener = TcpListener::bind("127.0.0.1:4221").unwrap();
+    
+    
+    // for stream in listener.incoming() {
+    //     let stream = stream.unwrap();
+    //     let directory_clone=directory.clone();  
+    //     pool.execute(move || {
+    //         handle_connection(stream,directory_clone.as_str());
+    //     });  
         // handle_connection(stream,directory_clone.as_str());
         // thread::spawn(move|| {
         //     handle_connection(stream,directory_clone.as_str());
         // });
         
-        
-    }
-}
+    
 
 fn handle_connection(mut stream: TcpStream,directory:&str) {
     let buf_reader = BufReader::new(&mut stream);
