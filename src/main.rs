@@ -29,7 +29,7 @@ fn main() {
         let stream = stream.unwrap();
         // let directory=directory.to_string();  
         pool.execute(move || {
-            handle_connection(stream,&directory);
+            handle_connection(stream,directory);
         });  
         
         
@@ -37,7 +37,7 @@ fn main() {
     }
 }
 
-fn handle_connection(mut stream: TcpStream,directory:&String) {
+fn handle_connection(mut stream: TcpStream,directory:String) {
     let buf_reader = BufReader::new(&mut stream);
     let request_line=buf_reader.lines().map(|line|line.unwrap()).take_while(|line|!line.is_empty()).collect::<Vec<String>>();
 
@@ -71,7 +71,7 @@ fn handle_connection(mut stream: TcpStream,directory:&String) {
         stream.write_all(response.as_bytes()).unwrap();
     }else if uri.starts_with("/files/"){
         let filename=&uri[7..];
-        let mut filepath=PathBuf::from(&directory);
+        let mut filepath=PathBuf::from(directory);
         filepath.push(filename);
 
         match fs::read(&filepath){
