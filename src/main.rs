@@ -6,6 +6,7 @@ use std::{
     thread,
     env,
     path::PathBuf,
+    sync::Arc,
 };
 use http_server_starter_rust::ThreadPool;
 
@@ -14,7 +15,7 @@ fn main() {
     let args:Vec<String>=env::args().collect();
     println!("{:?}",args);
     let directory= if let Some(dir)=args.iter().position(|x| x=="--directory"){
-        args[dir+1].clone()
+        Arc::new(args[dir+1].clone()).to_string()
         // println!("Directory:{}",directory);
     }
     else{
