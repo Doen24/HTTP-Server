@@ -14,7 +14,7 @@ fn main() {
     let args:Vec<String>=env::args().collect();
     println!("{:?}",args);
     let directory= if let Some(dir)=args.iter().position(|x| x=="--directory"){
-        args[dir+1]
+        &args[dir+1]
         // println!("Directory:{}",directory);
     }
     else{
@@ -36,7 +36,7 @@ fn main() {
     }
 }
 
-fn handle_connection(mut stream: TcpStream,directory:String) {
+fn handle_connection(mut stream: TcpStream,directory:&String) {
     let buf_reader = BufReader::new(&mut stream);
     let request_line=buf_reader.lines().map(|line|line.unwrap()).take_while(|line|!line.is_empty()).collect::<Vec<String>>();
 
@@ -70,7 +70,7 @@ fn handle_connection(mut stream: TcpStream,directory:String) {
         stream.write_all(response.as_bytes()).unwrap();
     }else if uri.starts_with("/files/"){
         let filename=&uri[7..];
-        let mut filepath=PathBuf::from(directory);
+        let mut filepath=PathBuf::from(&directory);
         filepath.push(filename);
 
         match fs::read(&filepath){
