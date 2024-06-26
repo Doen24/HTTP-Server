@@ -73,6 +73,8 @@ fn handle_connection(mut stream: TcpStream,directory:&str) {
         let filename=&uri[7..];
         let mut filepath=PathBuf::from(&directory);
         // let mut filepath=directory.to_string();
+        println!("{:?}",filepath);
+        println!("{:?}",filename);
         filepath.push(filename);
 
         match fs::read(&filepath){
