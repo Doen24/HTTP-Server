@@ -8,33 +8,33 @@ use std::{
     path::PathBuf,
     sync::Arc,
 };
-// use http_server_starter_rust::ThreadPool;
+use http_server_starter_rust::ThreadPool;
 
 fn main() {
-    // let pool=ThreadPool::new(5);
+    let pool=ThreadPool::new(5);
     let args:Vec<String>=env::args().collect();
     println!("{:?}",args);
     let directory= if let Some(dir)=args.iter().position(|x| x=="--directory"){
         args[dir+1].clone()
         // println!("Directory:{}",directory);
-    }
-    else{
-        eprintln!("Usage:{}",args[0]);
-        return;
     };
+    // else{
+    //     eprintln!("Usage:{}",args[0]);
+    //     return;
+    // };
 
     let listener = TcpListener::bind("127.0.0.1:4221").unwrap();
 
     for stream in listener.incoming() {
         let stream = stream.unwrap();
         let directory_clone=directory.clone();  
-        // pool.execute(move || {
-        //     handle_connection(stream,directory_clone.as_str());
-        // });  
-        // handle_connection(stream,directory_clone.as_str());
-        thread::spawn(move|| {
+        pool.execute(move || {
             handle_connection(stream,directory_clone.as_str());
-        });
+        });  
+        // handle_connection(stream,directory_clone.as_str());
+        // thread::spawn(move|| {
+        //     handle_connection(stream,directory_clone.as_str());
+        // });
         
         
     }
