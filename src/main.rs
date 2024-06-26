@@ -15,7 +15,7 @@ fn main() {
     let args:Vec<String>=env::args().collect();
     println!("{:?}",args);
     let directory= if let Some(dir)=args.iter().position(|x| x=="--directory"){
-        Arc::new(args[dir+1].clone()).to_string()
+        (args[dir+1].clone()).to_string()
         // println!("Directory:{}",directory);
     }
     else{
