@@ -8,6 +8,7 @@ use std::{
     path::PathBuf,
     sync::Arc,
 };
+use std::io::Write;
 // use http_server_starter_rust::ThreadPool;
 
 fn main() {
@@ -90,15 +91,29 @@ fn handle_connection(mut stream: TcpStream) {
             }
         }
         else if method=="POST"{
-            let mut file=fs::File::create(filepath).unwrap();
-            // let post_request=buf_reader.lines().map(|line|line.unwrap()).collect::<Vec<String>>();
             let empty_line_index=request_line.iter().position(|x| x.is_empty()).unwrap();
             let content=request_line[empty_line_index+1].clone();
             let length=content.len();
-            file.write_all(content.as_bytes()).unwrap();
-            let status_line="HTTP/1.1 201 Created";
-            let response=format!("{status_line}\r\nContent-Type:application/octet-stream\r\nContent-Length: {length}\r\n\r\n");
-            stream.write_all(response.as_bytes()).unwrap();
+            match fs::File::create(&filepath){
+                Ok(mut file)=>{
+                    match file.write_all(content.as_bytes()){
+                        Ok(_)=>{
+                            let status_line="HTTP/1.1 201 Created";
+                            let response=format!("{status_line}\r\nContent-Type:application/octet-stream\r\nContent-Length: {length}\r\n\r\n");
+                            stream.write_all(response.as_bytes()).unwrap();
+                        
+                        },
+                        Err(e)=>{
+                            send_404(&mut stream);
+                            return;
+                        }
+                    }
+                },
+                Err(e)=>{
+                    send_404(&mut stream);
+                    return;
+                }
+            };
         }
         else{
             send_404(&mut stream);
