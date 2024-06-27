@@ -8,32 +8,22 @@ use std::{
     path::PathBuf,
     sync::Arc,
 };
-use std::io::Write;
-// use http_server_starter_rust::ThreadPool;
 
 fn main() {
     let listener = TcpListener::bind("127.0.0.1:4221").unwrap();
-    
-    // let pool=ThreadPool::new(5);
-    // let args:Vec<String>=env::args().collect();
-    // println!("{:?}",args);
     for stream in listener.incoming() {
         let stream = stream.unwrap();
-        // let args:Vec<String>=env::args().collect();
-        // let directory_clone=directory.clone();  
         thread::spawn(move || {
             handle_connection(stream);
         });  
 }   
 }
         
-    
-
 fn handle_connection(mut stream: TcpStream) {
     let buf_reader = BufReader::new(&mut stream);
     // let request_line=buf_reader.lines().map(|line|line.unwrap()).take_while(|line|!line.is_empty()).collect::<Vec<String>>();
     let request_line=buf_reader.lines().map(|line|line.unwrap()).collect::<Vec<String>>();
-    
+      
     if request_line.is_empty(){
         send_404(&mut stream);
         return;
@@ -48,21 +38,19 @@ fn handle_connection(mut stream: TcpStream) {
     let uri=parts[1];
     let _httpversion=parts[2];
     
-    // if method!="GET"{
-    //     send_404(&mut stream);
-    //     return;
-    // }
 
     if uri=="/"{
             stream.write_all("HTTP/1.1 200 OK\r\n\r\n".as_bytes()).unwrap();
-    }else if uri.starts_with("/echo/"){
+    }
+    else if uri.starts_with("/echo/"){
         let contents=&uri[6..];
         let length=contents.len();
         let status_line="HTTP/1.1 200 OK";
         let response=
             format!("{status_line}\r\nContent-Type:text/plain\r\nContent-Length:{length}\r\n\r\n{contents}");
         stream.write_all(response.as_bytes()).unwrap();
-    }else if uri.starts_with("/files/"){
+    }
+    else if uri.starts_with("/files/"){
         let args:Vec<String>=env::args().collect();
         let dir_index= args.iter()
             .position(|x| x=="--directory")
@@ -70,11 +58,8 @@ fn handle_connection(mut stream: TcpStream) {
         let directory=&args[dir_index+1];
         let filename=&uri[7..];
         let mut filepath=PathBuf::from(&directory);
-        println!("{:?}",filepath);
-        println!("{:?}",filename);
         filepath.push(filename);
-        //POST请求，接受文件并创建，从请求中读取第一行method为post，uri为/files/filename,body中读取content并写入创建的文件
-        //GET请求，从指定路径读取文件并response
+
         if method=="GET" {
             match fs::read(&filepath){
                 Ok(contents)=>{
@@ -91,8 +76,14 @@ fn handle_connection(mut stream: TcpStream) {
             }
         }
         else if method=="POST"{
-            let empty_line_index=request_line.iter().position(|x| x.is_empty()).unwrap();
-            let content=request_line[empty_line_index+1].clone();
+            let empty_line_index: Vec<usize> = request_line.iter()
+                .enumerate()
+                .filter_map(|(index, line)| if line.is_empty() { Some(index) } else { None })
+                .collect();
+
+
+            // let empty_line_index=request_line.iter().position(|x| x.is_empty()).unwrap();
+            let content=request_line[empty_line_index[0]+1].clone();
             let length=content.len();
             match fs::File::create(&filepath){
                 Ok(mut file)=>{
