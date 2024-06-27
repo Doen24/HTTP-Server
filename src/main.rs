@@ -96,7 +96,7 @@ fn handle_connection(mut stream: TcpStream) {
             let length=content.len();
             match fs::File::create(&filepath){
                 Ok(mut file)=>{
-                    match file.write_all(content.as_bytes()){
+                    match file.write_all(content){
                         Ok(_)=>{
                             let status_line="HTTP/1.1 201 Created\r\n\r\n";
                             // let response=format!("{status_line}\r\nContent-Type:application/octet-stream\r\nContent-Length: {length}\r\n\r\n");
