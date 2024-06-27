@@ -99,7 +99,7 @@ fn handle_connection(mut stream: TcpStream) {
                     match file.write_all(content.as_bytes()){
                         Ok(_)=>{
                             // let status_line="HTTP/1.1 201 Created\r\n\r\n";
-                            let response=format!(""HTTP/1.1 201 Created\r\n\r\n"");
+                            let response=format!("HTTP/1.1 201 Created\r\n\r\n");
                             stream.write_all(response.as_bytes()).unwrap();
                         
                         },
