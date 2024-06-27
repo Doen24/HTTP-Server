@@ -76,14 +76,14 @@ fn handle_connection(mut stream: TcpStream) {
             }
         }
         else if method=="POST"{
-            let empty_line_index: Vec<usize> = request_line.iter()
-                .enumerate()
-                .filter_map(|(index, line)| if line.is_empty() { Some(index) } else { None })
-                .collect();
+            // let empty_line_index: Vec<usize> = request_line.iter()
+            //     .enumerate()
+            //     .filter_map(|(index, line)| if line.is_empty() { Some(index) } else { None })
+            //     .collect();
 
 
-            // let empty_line_index=request_line.iter().position(|x| x.is_empty()).unwrap();
-            let content=request_line[empty_line_index[0]+1].clone();
+            let empty_line_index=request_line.iter().position(|x| x==" ").unwrap();
+            let content=request_line[empty_line_index+1].clone();
             let length=content.len();
             match fs::File::create(&filepath){
                 Ok(mut file)=>{
