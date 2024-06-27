@@ -8,36 +8,30 @@ use std::{
     path::PathBuf,
     sync::Arc,
 };
-use http_server_starter_rust::ThreadPool;
+// use http_server_starter_rust::ThreadPool;
 
 fn main() {
     let listener = TcpListener::bind("127.0.0.1:4221").unwrap();
     
-    let pool=ThreadPool::new(5);
+    // let pool=ThreadPool::new(5);
     // let args:Vec<String>=env::args().collect();
     // println!("{:?}",args);
     for stream in listener.incoming() {
         let stream = stream.unwrap();
-        let args:Vec<String>=env::args().collect();
+        // let args:Vec<String>=env::args().collect();
         // let directory_clone=directory.clone();  
-        pool.execute(move || {
-            handle_connection(stream,args);
+        thread::spawn(move || {
+            handle_connection(stream);
         });  
 }   
 }
         
     
 
-fn handle_connection(mut stream: TcpStream,args:Vec<String>) {
+fn handle_connection(mut stream: TcpStream) {
     let buf_reader = BufReader::new(&mut stream);
     let request_line=buf_reader.lines().map(|line|line.unwrap()).take_while(|line|!line.is_empty()).collect::<Vec<String>>();
-    let dir_index= args.iter()
-        .position(|x| x=="--directory")
-        .expect("no path ");
-    let directory=&args[dir_index+1];
-        // {
-        // args[dir+1].clone()
-        // };
+    
     if request_line.is_empty(){
         send_404(&mut stream);
         return;
@@ -67,9 +61,13 @@ fn handle_connection(mut stream: TcpStream,args:Vec<String>) {
             format!("{status_line}\r\nContent-Type:text/plain\r\nContent-Length:{length}\r\n\r\n{contents}");
         stream.write_all(response.as_bytes()).unwrap();
     }else if uri.starts_with("/files/"){
+        let args:Vec<String>=env::args().collect();
+        let dir_index= args.iter()
+            .position(|x| x=="--directory")
+            .expect("no path ");
+        let directory=&args[dir_index+1];
         let filename=&uri[7..];
         let mut filepath=PathBuf::from(&directory);
-        // let mut filepath=directory.to_string();
         println!("{:?}",filepath);
         println!("{:?}",filename);
         filepath.push(filename);
