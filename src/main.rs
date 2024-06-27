@@ -30,7 +30,8 @@ fn main() {
 
 fn handle_connection(mut stream: TcpStream) {
     let buf_reader = BufReader::new(&mut stream);
-    let request_line=buf_reader.lines().map(|line|line.unwrap()).take_while(|line|!line.is_empty()).collect::<Vec<String>>();
+    // let request_line=buf_reader.lines().map(|line|line.unwrap()).take_while(|line|!line.is_empty()).collect::<Vec<String>>();
+    let request_line=buf_reader.lines().map(|line|line.unwrap()).collect::<Vec<String>>();
     
     if request_line.is_empty(){
         send_404(&mut stream);
@@ -46,10 +47,10 @@ fn handle_connection(mut stream: TcpStream) {
     let uri=parts[1];
     let _httpversion=parts[2];
     
-    if method!="GET"{
-        send_404(&mut stream);
-        return;
-    }
+    // if method!="GET"{
+    //     send_404(&mut stream);
+    //     return;
+    // }
 
     if uri=="/"{
             stream.write_all("HTTP/1.1 200 OK\r\n\r\n".as_bytes()).unwrap();
@@ -71,19 +72,36 @@ fn handle_connection(mut stream: TcpStream) {
         println!("{:?}",filepath);
         println!("{:?}",filename);
         filepath.push(filename);
-
-        match fs::read(&filepath){
-            Ok(contents)=>{
-                let length=contents.len();
-                let status_line="HTTP/1.1 200 OK";
-                let response=
-                    format!("{status_line}\r\nContent-Type:application/octet-stream\r\nContent-Length:{length}\r\n\r\n");
-                stream.write_all(response.as_bytes()).unwrap();
-                stream.write_all(&contents).unwrap();
+        //POST请求，接受文件并创建，从请求中读取第一行method为post，uri为/files/filename,body中读取content并写入创建的文件
+        //GET请求，从指定路径读取文件并response
+        if method=="GET" {
+            match fs::read(&filepath){
+                Ok(contents)=>{
+                    let length=contents.len();
+                    let status_line="HTTP/1.1 200 OK";
+                    let response=
+                        format!("{status_line}\r\nContent-Type:application/octet-stream\r\nContent-Length:{length}\r\n\r\n");
+                    stream.write_all(response.as_bytes()).unwrap();
+                    stream.write_all(&contents).unwrap();
+                }
+                Err(_)=>{
+                    send_404(&mut stream);
+                }
             }
-            Err(_)=>{
-                send_404(&mut stream);
-            }
+        }
+        else if method=="POST"{
+            let mut file=fs::File::create(filepath).unwrap();
+            // let post_request=buf_reader.lines().map(|line|line.unwrap()).collect::<Vec<String>>();
+            let empty_line_index=request_line.iter().position(|x| x.is_empty()).unwrap();
+            let content=request_line[empty_line_index+1].clone();
+            let length=content.len();
+            file.write_all(content.as_bytes()).unwrap();
+            let status_line="HTTP/1.1 201 Created";
+            let response=format!("{status_line}\r\nContent-Type:application/octet-stream\r\nContent-Length: {length}\r\n\r\n");
+            stream.write_all(response.as_bytes()).unwrap();
+        }
+        else{
+            send_404(&mut stream);
         }
     } 
     else if uri=="/user-agent" {
