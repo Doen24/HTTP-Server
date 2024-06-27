@@ -98,7 +98,7 @@ fn handle_connection(mut stream: TcpStream) {
                 Ok(mut file)=>{
                     match file.write_all(content.as_bytes()){
                         Ok(_)=>{
-                            // let status_line="HTTP/1.1 201 Created\r\n\r\n";
+                            
                             let response=format!("HTTP/1.1 201 Created\r\n\r\n");
                             stream.write_all(response.as_bytes()).unwrap();
                         
@@ -110,7 +110,9 @@ fn handle_connection(mut stream: TcpStream) {
                     }
                 },
                 Err(e)=>{
-                    send_404(&mut stream);
+                    let status_line="HTTP/1.1 500 Internal Server Error";
+                    let response=format!("{status_line}\r\n\r\n");
+                    stream.write_all(response.as_bytes()).unwrap();
                     return;
                 }
             };
