@@ -87,7 +87,7 @@ fn handle_connection(mut stream: TcpStream) {
             let length=content.len();
             match fs::File::create(&filepath){
                 Ok(mut file)=>{
-                    match file.write_all(content.as_bytes()){
+                    match file.write(content.as_bytes()){
                         Ok(_)=>{
                             
                             let response=format!("HTTP/1.1 201 Created\r\n\r\n");
