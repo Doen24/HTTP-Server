@@ -14,60 +14,30 @@ fn main() {
     let listener = TcpListener::bind("127.0.0.1:4221").unwrap();
     
     let pool=ThreadPool::new(5);
-    let args:Vec<String>=env::args().collect();
-    println!("{:?}",args);
-    if args.len()>1{
-        let directory= if let Some(dir)=args.iter().position(|x| x=="--directory"){
-            args[dir+1].clone()
-        // println!("Directory:{}",directory);
-        }
-        else{
-            eprintln!("Usage:{}",args[0]);
-        // "none file".to_string()
-            return;
-        };
-    
-        for stream in listener.incoming() {
-            let stream = stream.unwrap();
-            let directory_clone=directory.clone();  
-            pool.execute(move || {
-                handle_connection(stream,directory_clone.as_str());
-            });  
-    }
-    }else{
-        let directory=" ".to_string();
-        for stream in listener.incoming() {
-            let stream = stream.unwrap();
-            let directory_clone=directory.clone();  
-            pool.execute(move || {
-                handle_connection(stream,directory_clone.as_str());
-            });  
-        }
+    // let args:Vec<String>=env::args().collect();
+    // println!("{:?}",args);
+    for stream in listener.incoming() {
+        let stream = stream.unwrap();
+        let args:Vec<String>=env::args().collect();
+        // let directory_clone=directory.clone();  
+        pool.execute(move || {
+            handle_connection(stream,args);
+        });  
 }   
 }
         
     
 
-    // let listener = TcpListener::bind("127.0.0.1:4221").unwrap();
-    
-    
-    // for stream in listener.incoming() {
-    //     let stream = stream.unwrap();
-    //     let directory_clone=directory.clone();  
-    //     pool.execute(move || {
-    //         handle_connection(stream,directory_clone.as_str());
-    //     });  
-        // handle_connection(stream,directory_clone.as_str());
-        // thread::spawn(move|| {
-        //     handle_connection(stream,directory_clone.as_str());
-        // });
-        
-    
-
-fn handle_connection(mut stream: TcpStream,directory:&str) {
+fn handle_connection(mut stream: TcpStream,args:Vec<String>) {
     let buf_reader = BufReader::new(&mut stream);
     let request_line=buf_reader.lines().map(|line|line.unwrap()).take_while(|line|!line.is_empty()).collect::<Vec<String>>();
-
+    let dir_index= args.iter()
+        .position(|x| x=="--directory")
+        .expect("no path ");
+    let directory=&args[dir_index+1];
+        // {
+        // args[dir+1].clone()
+        // };
     if request_line.is_empty(){
         send_404(&mut stream);
         return;
@@ -133,17 +103,14 @@ fn handle_connection(mut stream: TcpStream,directory:&str) {
         }else{
 
             send_404(&mut stream);
-            }
-           
-        
         }
-        else {
+        
+    }else {
             send_404(&mut stream);
             return;        
-        }
+    }
 
-    
-    
+   
 }
 fn send_404(stream: &mut TcpStream) {
     let status_line = "HTTP/1.1 404 Not Found";
