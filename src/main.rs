@@ -98,9 +98,9 @@ fn handle_connection(mut stream: TcpStream) {
                 Ok(mut file)=>{
                     match file.write_all(content.as_bytes()){
                         Ok(_)=>{
-                            let status_line="HTTP/1.1 201 Created";
-                            let response=format!("{status_line}\r\nContent-Type:application/octet-stream\r\nContent-Length: {length}\r\n\r\n");
-                            stream.write_all(response.as_bytes()).unwrap();
+                            let status_line="HTTP/1.1 201 Created\r\n\r\n";
+                            // let response=format!("{status_line}\r\nContent-Type:application/octet-stream\r\nContent-Length: {length}\r\n\r\n");
+                            stream.write_all(status_line.as_bytes()).unwrap();
                         
                         },
                         Err(e)=>{
