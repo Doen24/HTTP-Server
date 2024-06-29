@@ -91,6 +91,7 @@ fn config()->String{
 fn handle_connection(mut stream: TcpStream) {
     let http_request=Http_request::parsing(&stream);
     match http_request.method.as_str(){
+        //GET uppercase 大写
         "GET"=>{
             if http_request.uri=="/"{
                 stream.write_all("HTTP/1.1 200 OK\r\n\r\n".as_bytes()).unwrap();
@@ -100,13 +101,14 @@ fn handle_connection(mut stream: TcpStream) {
                 let length=contents.len();
                 let status_line="HTTP/1.1 200 OK";
                 if let Some(compression)=http_request.headers.get("Accept-Encoding"){
-                    if compression=="gzip"{
+                    let encodings=compression.split(",").map(|x| x.trim()).collect::<Vec<&str>>();
+                    if encodings.contains(&"gzip"){
                         let response=
-                            format!("{status_line}\r\nContent-Encoding: gzip\r\nContent-Type: text/plain\r\nContent-Length: {length}\r\n\r\n{contents}");
+                            format!("{status_line}\r\nContent-Type: text/plain\r\nContent-Encoding: gzip\r\n\r\n");
                         stream.write_all(response.as_bytes()).unwrap();
                     }else{
                         let response=
-                            format!("{status_line}\r\nContent-Type:text/plain\r\nContent-Length:{length}\r\n\r\n{contents}");
+                            format!("{status_line}\r\nContent-Type:text/plain\r\n\r\n");
                         stream.write_all(response.as_bytes()).unwrap();
                     }
                 }else{
