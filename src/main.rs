@@ -6,7 +6,9 @@ use std::{
     thread,
     env,
     path::PathBuf,
+    process::{Command,Stdio},
 };
+
 
 fn main() {
     let listener = TcpListener::bind("127.0.0.1:4221").unwrap();
@@ -31,7 +33,6 @@ impl Http_request{
         let mut buf_reader = BufReader::new(stream);
         let mut request_line=String::new();
         buf_reader.read_line(&mut request_line).unwrap();
-        //find empty str in request_line
         //空行转为空字符串"",而不是空格字符串" "
         //let empty_index=request_line.iter().position(|x| x=="").unwrap();
         let parts:Vec<&str>=request_line.trim_end().split_whitespace().collect();
@@ -70,6 +71,7 @@ impl Http_request{
     }
 }
 
+
 fn config()->String{
     let args:Vec<String>=env::args().collect();
     let dir_index= args.iter()
@@ -98,14 +100,25 @@ fn handle_connection(mut stream: TcpStream) {
             }
             else if http_request.uri.starts_with("/echo/"){
                 let contents=&http_request.uri[6..];
-                let length=contents.len();
+                let content_length=contents.len();
                 let status_line="HTTP/1.1 200 OK";
                 if let Some(compression)=http_request.headers.get("Accept-Encoding"){
                     let encodings=compression.split(",").map(|x| x.trim()).collect::<Vec<&str>>();
                     if encodings.contains(&"gzip"){
-                        let response=
-                            format!("{status_line}\r\nContent-Type: text/plain\r\nContent-Encoding: gzip\r\n\r\n");
-                        stream.write_all(response.as_bytes()).unwrap();
+                        match gzip(contents){
+                            Ok(contents_compress)=>{
+                                let length=contents_compress.len();
+                                let response=
+                                    format!("{status_line}\r\nContent-Encoding: gzip\r\nContent-Type: text/plain\r\nContent-Length:{length}\r\n\r\n");
+                                stream.write_all(response.as_bytes()).unwrap();
+                                stream.write_all(&contents_compress).unwrap();
+                            }
+                            Err(err)=>{
+                                eprintln!("Error compressing data:{}",err);
+                                send_404(&mut stream);
+                            }
+                        }
+                        
                     }else{
                         let response=
                             format!("{status_line}\r\nContent-Type:text/plain\r\n\r\n");
@@ -113,7 +126,7 @@ fn handle_connection(mut stream: TcpStream) {
                     }
                 }else{
                     let response=
-                        format!("{status_line}\r\nContent-Type:text/plain\r\nContent-Length:{length}\r\n\r\n{contents}");
+                        format!("{status_line}\r\nContent-Type:text/plain\r\nContent-Length: {content_length}\r\n\r\n{contents}");
                     stream.write_all(response.as_bytes()).unwrap();
                 }
                 
@@ -201,4 +214,32 @@ fn send_404(stream: &mut TcpStream) {
     let status_line = "HTTP/1.1 404 Not Found";
     let response = format!("{status_line}\r\n\r\n");
     stream.write_all(response.as_bytes()).unwrap();
+}
+
+fn gzip(contents:&str)->Result<Vec<u8>,String>{
+    let mut gzip=Command::new("gzip")
+        .arg("-c")
+        .stdin(Stdio::piped())
+        .stdout(Stdio::piped())
+        .spawn()
+        .map_err(|e| eprintln!{"Fail to spawn gzip process:{}",e})
+        .unwrap();
+
+    if let Some(mut gzip_stdin)=gzip.stdin.take(){
+        gzip_stdin
+            .write_all(contents.as_bytes())
+            .map_err(|e| eprintln!("Fail to write to gzip stdin:{}",e))
+            .unwrap();
+    }
+
+    let gzip_stdout=gzip
+        .wait_with_output()
+        .map_err(|e| eprintln!("Fail to read from gzip stdout:{}",e))
+        .unwrap();
+    
+    if gzip_stdout.status.success() {
+        Ok(gzip_stdout.stdout)
+    } else {
+        Err("Failed to compress data".to_string())
+    }
 }
